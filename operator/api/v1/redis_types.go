@@ -1,12 +1,9 @@
-/*
-Copyright 2022.
 
+/*
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,26 +17,26 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // RedisSpec defines the desired state of Redis
 type RedisSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// +optional
+	// +kubebuilder:default="k8s.gcr.io/redis:e2e"
 
-	// Foo is an example field of Redis. Edit redis_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// The container image.
+	ContainerImage string `json:"containerImage,omitempty"`
 }
 
 // RedisStatus defines the observed state of Redis
 type RedisStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// The name of the service created for the Redis .
+	RedisServiceName string `json:"redisServiceName"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:JSONPath=".status.redisServiceName",name="RedisService",type="string"
 
 // Redis is the Schema for the redis API
 type Redis struct {
@@ -50,7 +47,7 @@ type Redis struct {
 	Status RedisStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // RedisList contains a list of Redis
 type RedisList struct {
