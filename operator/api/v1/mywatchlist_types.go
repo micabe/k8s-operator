@@ -28,26 +28,43 @@ type MyWatchlistSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of MyWatchlist. Edit mywatchlist_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Frontend  FrontendSpec `json:"frontend"`
+	RedisName string       `json:"redisName,omitempty"`
 }
 
 // MyWatchlistStatus defines the observed state of MyWatchlist
 type MyWatchlistStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	URL string `json:"url"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// FrontendSpec speficies the frontend container spec
+type FrontendSpec struct {
+	// +optional
+	// +kubebuilder:default=micabe/redis-watchlist
+	ContainerImage string `json:"containerImage"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources"`
+
+	// +optional
+	// +kubebuilder:default=8080
+	// +kubebuilder:validation:Minimum=0
+	ServingPort int32 `json:"servingPort"`
+
+	// +optional
+	// +kubebuilder:default=1
+	// +kubebuilder:validation:Minimum=0
+	Replicas *int32 `json:"replicas,omitempty"`
+}
 
 // MyWatchlist is the Schema for the mywatchlists API
 type MyWatchlist struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MyWatchlistSpec   `json:"spec,omitempty"`
-	Status MyWatchlistStatus `json:"status,omitempty"`
+	Frontend    FrontendSpec      `json:"frontend,omitempty"`
+	Spec        MyWatchlistSpec   `json:"spec,omitempty"`
+	Status      MyWatchlistStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
