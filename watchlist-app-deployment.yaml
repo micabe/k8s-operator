@@ -15,13 +15,13 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: go-redis
-        image: hmanikkothu/watchlist:v1
-        ports:
-        - containerPort: 8080
-        env:
-        - name: REDIS_HOST
-          value: redis-watchlist-db
+        - name: go-redis
+          image: micabe/redis-watchlist
+          ports:
+            - containerPort: 8080
+          env:
+            - name: REDIS_HOST
+              value: redis-watchlist-db
 ---
 apiVersion: v1
 kind: Service
@@ -33,6 +33,6 @@ spec:
   type: LoadBalancer
   ports:
     # the port that this service should serve on
-  - port: 8080
+    - port: 8080
   selector:
     app: frontend
