@@ -3,4 +3,9 @@ kind: MyWatchlist
 metadata:
   name: mywatchlist-sample
 spec:
-  # TODO(user): Add fields here
+  redisName: redis-sample # points to the DB to be used
+  frontend:
+    containerImage: micabe/redis-watchlist
+    resources:
+      requests:
+        cpu: 55m
