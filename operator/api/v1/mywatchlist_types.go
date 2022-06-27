@@ -63,9 +63,9 @@ type MyWatchlist struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Frontend    FrontendSpec      `json:"frontend,omitempty"`
-	Spec        MyWatchlistSpec   `json:"spec,omitempty"`
-	Status      MyWatchlistStatus `json:"status,omitempty"`
+	Frontend FrontendSpec      `json:"frontend,omitempty"`
+	Spec     MyWatchlistSpec   `json:"spec,omitempty"`
+	Status   MyWatchlistStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
