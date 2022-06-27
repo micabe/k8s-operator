@@ -21,8 +21,8 @@ make deploy
 ### Deploy app
 
 ```
-kubectl create -f config/samples/webapp_v1_redis.yaml
-kubectl create -f config/samples/webapp_v1_mywatchlist.yaml
+kubectl create -f operator/config/samples/webapp_v1_redis.yaml
+kubectl create -f operator/config/samples/webapp_v1_mywatchlist.yaml
 ```
 
 ### Forward port
@@ -30,4 +30,12 @@ kubectl create -f config/samples/webapp_v1_mywatchlist.yaml
 ```
 kubectl get mywatchlist
 kubectl port-forward svc/mywatchlist-sample 7000:8080
+```
+
+### cleanup
+
+```
+kubectl delete -f operator/config/crd/bases/
+kubectl delete -f operator/config/samples/webapp_v1_redis.yaml
+kubectl delete -f operator/config/samples/webapp_v1_mywatchlist.yaml
 ```
