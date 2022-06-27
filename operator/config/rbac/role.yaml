@@ -62,12 +62,6 @@ rules:
 - apiGroups:
   - webapp.demo.my-watchlist.io
   resources:
-  - redis/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - webapp.demo.my-watchlist.io
-  resources:
   - redis/status
   verbs:
   - get
