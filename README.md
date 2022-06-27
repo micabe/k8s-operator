@@ -15,7 +15,7 @@ make install
 ### Deploy operator manager
 
 ```
-make deploy
+make deploy IMG=micabe/controller-watchlist
 ```
 
 ### Deploy app

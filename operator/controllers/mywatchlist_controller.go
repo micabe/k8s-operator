@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/go-logr/logr"
-	log "github.com/sirupsen/logrus"
+	echo "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/fields" // Required for Watching
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -58,7 +58,7 @@ type MyWatchlistReconciler struct {
 func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("mywatchlist", req.NamespacedName)
 
-	log.Info("reconciling mywatchlist")
+	// log.Info("reconciling mywatchlist")
 
 	var watchlist webappv1.MyWatchlist
 	if err := r.Get(ctx, req.NamespacedName, &watchlist); err != nil {
@@ -72,7 +72,7 @@ func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	log.Info("got redis", "redis", redis.Name)
+	// log.Info("got redis", "redis", redis.Name)
 
 	deployment, err := r.createDeployment(watchlist, redis)
 	if err != nil {
@@ -102,14 +102,14 @@ func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	log.Info("reconciled watchlist")
+	// log.Info("reconciled watchlist")
 
 	return ctrl.Result{}, nil
 }
 
 func getServiceURL(svc corev1.Service, port int32) string {
 	if len(svc.Status.LoadBalancer.Ingress) == 0 {
-		log.Info("urlForService: LoadBalancer.Ingess not set")
+		echo.Info("urlForService: LoadBalancer.Ingess not set")
 		return ""
 	}
 
@@ -146,7 +146,7 @@ func (r *MyWatchlistReconciler) createService(watchlist webappv1.MyWatchlist) (c
 }
 
 func (r *MyWatchlistReconciler) createDeployment(watchlist webappv1.MyWatchlist, redis webappv1.Redis) (appsv1.Deployment, error) {
-	log.Info("HK - WR-createDeployment :###: RedisServiceName=" + redis.Status.RedisServiceName + "\n")
+	echo.Info("HK - WR-createDeployment :###: RedisServiceName=" + redis.Status.RedisServiceName + "\n")
 
 	depl := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{APIVersion: appsv1.SchemeGroupVersion.String(), Kind: "Deployment"},
@@ -197,7 +197,7 @@ func (r *MyWatchlistReconciler) watchlistAppUsingRedis(obj client.Object) []ctrl
 	}
 
 	if err := r.List(context.Background(), list, listOptions); err != nil {
-		log.Error("watchlistAppUsingRedis: ", err)
+		echo.Error("watchlistAppUsingRedis: ", err)
 		return nil
 	}
 	res := make([]ctrl.Request, len(list.Items))
