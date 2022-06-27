@@ -25,8 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/go-logr/logr"
-	echo "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/fields" // Required for Watching
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -37,14 +35,13 @@ import (
 	webappv1 "my-watchlist.io/api/v1"
 )
 
-const (
-	configMapField = ".spec.redisName"
-)
+const configMapField = ".spec.redisName"
+
+var setupLog = ctrl.Log.WithName("setup")
 
 // MyWatchlistReconciler reconciles a MyWatchlist object
 type MyWatchlistReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -56,9 +53,7 @@ type MyWatchlistReconciler struct {
 
 // Reconcile reconciles the request
 func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("mywatchlist", req.NamespacedName)
-
-	// log.Info("reconciling mywatchlist")
+	setupLog.Info("reconciling mywatchlist")
 
 	var watchlist webappv1.MyWatchlist
 	if err := r.Get(ctx, req.NamespacedName, &watchlist); err != nil {
@@ -68,11 +63,11 @@ func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	var redis webappv1.Redis
 	redisName := client.ObjectKey{Name: watchlist.Spec.RedisName, Namespace: req.Namespace}
 	if err := r.Get(ctx, redisName, &redis); err != nil {
-		log.Error(err, "didn't get redis")
+		setupLog.Error(err, "didn't get redis")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// log.Info("got redis", "redis", redis.Name)
+	setupLog.Info("got redis", "redis", redis.Name)
 
 	deployment, err := r.createDeployment(watchlist, redis)
 	if err != nil {
@@ -102,14 +97,14 @@ func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	// log.Info("reconciled watchlist")
+	setupLog.Info("reconciled watchlist")
 
 	return ctrl.Result{}, nil
 }
 
 func getServiceURL(svc corev1.Service, port int32) string {
 	if len(svc.Status.LoadBalancer.Ingress) == 0 {
-		echo.Info("urlForService: LoadBalancer.Ingess not set")
+		setupLog.Info("urlForService: LoadBalancer.Ingess not set")
 		return ""
 	}
 
@@ -146,7 +141,7 @@ func (r *MyWatchlistReconciler) createService(watchlist webappv1.MyWatchlist) (c
 }
 
 func (r *MyWatchlistReconciler) createDeployment(watchlist webappv1.MyWatchlist, redis webappv1.Redis) (appsv1.Deployment, error) {
-	echo.Info("HK - WR-createDeployment :###: RedisServiceName=" + redis.Status.RedisServiceName + "\n")
+	setupLog.Info("HK - WR-createDeployment :###: RedisServiceName=" + redis.Status.RedisServiceName + "\n")
 
 	depl := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{APIVersion: appsv1.SchemeGroupVersion.String(), Kind: "Deployment"},
@@ -197,7 +192,7 @@ func (r *MyWatchlistReconciler) watchlistAppUsingRedis(obj client.Object) []ctrl
 	}
 
 	if err := r.List(context.Background(), list, listOptions); err != nil {
-		echo.Error("watchlistAppUsingRedis: ", err)
+		setupLog.Error(err, "watchlistAppUsingRedis: ")
 		return nil
 	}
 	res := make([]ctrl.Request, len(list.Items))

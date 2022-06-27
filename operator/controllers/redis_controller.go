@@ -21,7 +21,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,7 +34,6 @@ import (
 // RedisReconciler reconciles a Redis object
 type RedisReconciler struct {
 	client.Client
-	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
@@ -44,9 +42,7 @@ type RedisReconciler struct {
 
 // Reconcile reconciles the request
 func (r *RedisReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("redis", req.NamespacedName)
-
-	log.Info("reconciling redis")
+	setupLog.Info("reconciling redis")
 
 	var redis webappv1.Redis
 	if err := r.Get(ctx, req.NamespacedName, &redis); err != nil {
@@ -73,7 +69,7 @@ func (r *RedisReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, err
 	}
 	redis.Status.RedisServiceName = reidsSvc.Name
-	log.Info("HK :###: RedisServiceName=" + redis.Status.RedisServiceName)
+	setupLog.Info("HK :###: RedisServiceName=" + redis.Status.RedisServiceName)
 
 	if err := r.Status().Update(ctx, &redis); err != nil {
 		return ctrl.Result{}, err
