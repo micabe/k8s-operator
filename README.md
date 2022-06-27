@@ -29,6 +29,7 @@ kubectl create -f operator/config/samples/webapp_v1_mywatchlist.yaml
 
 ```
 kubectl get mywatchlist
+
 kubectl port-forward svc/mywatchlist-sample 7000:8080
 ```
 

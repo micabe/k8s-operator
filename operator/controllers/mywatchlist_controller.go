@@ -162,7 +162,7 @@ func (r *MyWatchlistReconciler) createDeployment(watchlist webappv1.MyWatchlist,
 					Containers: []corev1.Container{
 						{
 							Name:  "frontend",
-							Image: "hmanikkothu/watchlist:v1",
+							Image: "micabe/redis-watchlist",
 							Env: []corev1.EnvVar{
 								{Name: "REDIS_HOST", Value: redis.Status.RedisServiceName},
 							},
