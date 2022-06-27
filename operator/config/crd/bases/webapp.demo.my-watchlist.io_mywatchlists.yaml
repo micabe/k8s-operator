@@ -15,7 +15,14 @@ spec:
     singular: mywatchlist
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .status.url
+      name: URL
+      type: string
+    - jsonPath: .spec.frontend.replicas
+      name: Desired
+      type: integer
+    name: v1
     schema:
       openAPIV3Schema:
         description: MyWatchlist is the Schema for the mywatchlists API
@@ -138,3 +145,5 @@ spec:
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}

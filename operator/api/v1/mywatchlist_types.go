@@ -1,5 +1,4 @@
 /*
-Copyright 2022.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,21 +20,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // MyWatchlistSpec defines the desired state of MyWatchlist
 type MyWatchlistSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	Frontend  FrontendSpec `json:"frontend"`
 	RedisName string       `json:"redisName,omitempty"`
-}
-
-// MyWatchlistStatus defines the observed state of MyWatchlist
-type MyWatchlistStatus struct {
-	URL string `json:"url"`
 }
 
 // FrontendSpec speficies the frontend container spec
@@ -58,6 +48,16 @@ type FrontendSpec struct {
 	Replicas *int32 `json:"replicas,omitempty"`
 }
 
+// MyWatchlistStatus defines the observed state of MyWatchlist
+type MyWatchlistStatus struct {
+	URL string `json:"url"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:JSONPath=".status.url",name="URL",type="string"
+// +kubebuilder:printcolumn:JSONPath=".spec.frontend.replicas",name="Desired",type="integer"
+
 // MyWatchlist is the Schema for the mywatchlists API
 type MyWatchlist struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -68,7 +68,7 @@ type MyWatchlist struct {
 	Status   MyWatchlistStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // MyWatchlistList contains a list of MyWatchlist
 type MyWatchlistList struct {
