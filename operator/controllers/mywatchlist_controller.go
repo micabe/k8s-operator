@@ -27,13 +27,18 @@ import (
 
 	"github.com/go-logr/logr"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/fields" // Required for Watching
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sigs.k8s.io/controller-runtime/pkg/handler" // Required for Watching
+	"sigs.k8s.io/controller-runtime/pkg/source"  // Required for Watching
 
 	webappv1 "my-watchlist.io/api/v1"
+)
+
+const (
+	configMapField = ".spec.redisName"
 )
 
 // MyWatchlistReconciler reconciles a MyWatchlist object
@@ -50,8 +55,7 @@ type MyWatchlistReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=services,verbs=list;watch;get;patch;create;update
 
 // Reconcile reconciles the request
-func (r *MyWatchlistReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *MyWatchlistReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("mywatchlist", req.NamespacedName)
 
 	log.Info("reconciling mywatchlist")
@@ -185,16 +189,15 @@ func (r *MyWatchlistReconciler) createDeployment(watchlist webappv1.MyWatchlist,
 	return depl, nil
 }
 
-func (r *MyWatchlistReconciler) watchlisAppUsingRedis(obj handler.MapObject) []ctrl.Request {
-	listOptions := []client.ListOption{
-		// matching our index
-		client.MatchingField(".spec.redisName", obj.Meta.GetName()),
-		// in the right namespace
-		client.InNamespace(obj.Meta.GetNamespace()),
+func (r *MyWatchlistReconciler) watchlistAppUsingRedis(obj client.Object) []ctrl.Request {
+	list := &webappv1.MyWatchlistList{}
+	listOptions := &client.ListOptions{
+		FieldSelector: fields.OneTermEqualSelector(configMapField, obj.GetName()),
+		Namespace:     obj.GetNamespace(),
 	}
-	var list webappv1.MyWatchlistList
-	if err := r.List(context.Background(), &list, listOptions...); err != nil {
-		log.Error("watchlisAppUsingRedis: ", err)
+
+	if err := r.List(context.Background(), list, listOptions); err != nil {
+		log.Error("watchlistAppUsingRedis: ", err)
 		return nil
 	}
 	res := make([]ctrl.Request, len(list.Items))
@@ -208,8 +211,8 @@ func (r *MyWatchlistReconciler) watchlisAppUsingRedis(obj handler.MapObject) []c
 // SetupWithManager inits the controller
 func (r *MyWatchlistReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetFieldIndexer().IndexField(
-		&webappv1.MyWatchlist{}, ".spec.redisName",
-		func(obj runtime.Object) []string {
+		context.Background(), &webappv1.MyWatchlist{}, configMapField,
+		func(obj client.Object) []string {
 			redisName := obj.(*webappv1.MyWatchlist).Spec.RedisName
 			if redisName == "" {
 				return nil
@@ -223,8 +226,7 @@ func (r *MyWatchlistReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Watches(
 			&source.Kind{Type: &webappv1.Redis{}},
-			&handler.EnqueueRequestsFromMapFunc{
-				ToRequests: handler.ToRequestsFunc(r.watchlisAppUsingRedis),
-			}).
+			handler.EnqueueRequestsFromMapFunc(r.watchlistAppUsingRedis),
+		).
 		Complete(r)
 }
